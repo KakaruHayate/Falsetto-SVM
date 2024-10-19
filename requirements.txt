@@ -1,2 +1,9 @@
-pandas
-openpyxl
+librosa
+numpy
+PyYAML
+scikit_learn
+scipy
+SoundFile
+tensorboard
+tqdm
+torch
