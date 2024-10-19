@@ -1,0 +1,25 @@
+data:
+  mfcc_order: 13
+  fft_size: 256
+  sampling_rate: 44100
+  hop_length: 256
+  pre_emph: 0.97
+  train_frames: 87 # In the CCMUSIC falsetto dataset, almost all data lengths are the same
+  train_path: data/train # Create a folder named "audio" under this path and put the audio clip in it
+  valid_path: data/val # Create a folder named "audio" under this path and put the audio clip in it
+device: cuda
+model:
+  input_size: 13 # equal to mfcc_order
+  output_size: 1 # do not change
+env:
+  expdir: exp/falsetto
+  gpu_id: 0
+train:
+  num_workers: 0 # if your cpu and gpu are both very strong, set to 0 may be faster!
+  batch_size: 9999 # As large as possible
+  cache_all_data: true # Save Internal-Memory if it is false, but may be slow
+  epochs: 150000
+  interval_log: 100
+  interval_val: 2000
+  lr: 0.000005
+  weight_decay: 0
