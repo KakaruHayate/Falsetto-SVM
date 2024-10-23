@@ -8,4 +8,4 @@
 
 你可以使用`train.py`去训练一个SVM，在那之前使用`preprocess.py`进行预处理
 
-可以使用'main.py'识别一些短音频是否为falsetto
+可以使用`main.py`识别一些短音频是否为falsetto
