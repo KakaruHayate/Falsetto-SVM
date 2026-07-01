@@ -1,13 +1,15 @@
 # REVIEW — Falsetto-SVM reproduction audit
 
-**Repository**: `H:/GitHub/Falsetto-SVM/`
+**Repository**: the upstream PyTorch sketch (the sibling `SVM.py`,
+`preprocess.py`, etc. — also reachable as `KakaruHayate/Falsetto-SVM`
+on GitHub).
 **Paper**: G. J. Mysore & P. Smaragdis, *Singer-Dependent Falsetto Detection
 for Live Vocal Processing Based on Support Vector Classification*, ICASSP 2006.
 **Dataset**: CCMusic chest_falsetto (1,280 clips, 12 singers, 44.1 kHz mono)
 
 This document lists the discrepancies found between the paper and the code
 at the time of review (July 2026). A corrected reproduction is available at
-`J:/FSVM/fsvm/`.
+`fsvm/` (sibling directory at the repo root).
 
 ---
 
@@ -69,10 +71,11 @@ therefore reasonable but undocumented.
 ## Python SVM core analysis (`SVM.py` ↔ paper Eq.(7))
 
 In addition to the four above, we also did an exercise of trying to
-make the upstream `H:/GitHub/Falsetto-SVM/SVM.py` match the paper's
-linear SVM (Eq.(7)) directly.  We re-ran the SVM under identical 7-fold
-CV on the singer-0 subset and observed the following curve.  Each step
-*fixes* one characteristic of the upstream `nn.Linear + HingeLoss`:
+make the upstream `SVM.py` (the `nn.Linear + HingeLoss` snippet at the
+repo root) match the paper's linear SVM (Eq.(7)) directly.  We re-ran
+the SVM under identical 7-fold CV on the singer-0 subset and observed
+the following curve.  Each step *fixes* one characteristic of the
+upstream `nn.Linear + HingeLoss`:
 
 | implementation                                     | 7-fold CF | err |
 |---------------------------------------------------|----------:|-----:|
@@ -93,7 +96,7 @@ Observations:
 2. **The right `weight_decay`.**  We tried several formulae:
    `wd = 1/(C·N)`, `wd = 1/(2·C·N)`, and `wd = C`.  Empirically
    `wd = C` (i.e. `wd_scale · C` in
-   `J:/FSVM/fsvm/torch_linear_svm.py`) tracks LinearSVC most closely
+   `fsvm/torch_linear_svm.py`) tracks LinearSVC most closely
    across singer sizes (825 ≤ N ≤ 4675).  The `1/(C·N)` formulae are
    too pessimistic for small `N`, which is most of the singers.
 3. **Feature scaling matters for SGD but not for QP.**
@@ -117,5 +120,7 @@ of the linear SVM primal/hinge-loss form once L2 + scaling are added;
 without them (as in the original repo) it does something qualitatively
 different and noticeably worse.
 
-The reference implementation is available at
-`J:/FSVM/fsvm/torch_linear_svm.py`.
+A runnable reference implementation that mirrors the upstream `SVM.py`
+and applies the two fixes lives at `fsvm/torch_linear_svm.py`.  The
+accompanying triangulation document `PYTORCH_VS_SKLEARN_SVM.md` walks
+through the reasoning behind each fix.

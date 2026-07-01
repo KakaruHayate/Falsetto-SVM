@@ -1,0 +1,40 @@
+# fsvm — fidelity-corrected reproduction config
+# Refs paper eq. (7) (linear SVM) and eq. (8) (Gaussian/RBF), Section 4 (MFCC),
+# Section 5 (singer-dependent pipeline).
+
+data:
+  mfcc_order: 13            # paper Sec. 4: "Nc = 13 cepstral coefficients"
+  fft_size: 256             # paper: "frame size is 256 samples"
+  sampling_rate: 44100      # paper: 44.1 kHz
+  hop_length: 882           # paper: "frame rate is 50 Hz" → hop = sr / 50 = 882
+  pre_emph: 0.97            # Slaney-style pre-emphasis
+  train_frames: 25          # paper: ~24 feature vectors per note (0.5s @ 50Hz + 1)
+  audio_dir: cache_wavs  # all 1280 wavs treated uniformly
+
+device: cpu                # SVM via sklearn; embeddings via CPU VoiceEncoder
+
+model:
+  input_size: 13
+  output_size: 1
+
+# Singer-identification (ColorSplitter VoiceEncoder + spectral clustering)
+singer_id:
+  enabled: true
+  encoder_weights: bundled  # 'bundled' = resemblyzer.pretrained.pt (Resemble AI)
+                            # 'colorsplitter' = ColorSplitter/pretrain/encoder_1570000.bak
+  emb_sr: 16000            # must match Resemblyzer.hparams.sampling_rate
+  n_speakers: 12           # CCMusic dataset has 12 singers (per dataset README)
+  cache_emb: data/singer_id/embeddings.npy
+  cache_csv: data/singer_id/singer_id.csv
+
+env:
+  expdir: results/falsetto
+  models_dir: results/models
+
+train:
+  cv_folds: 7              # paper used 7-fold cross-validation
+  min_frames_per_singer: 30
+  kernels:
+    linear: {kind: linear, C: 0.0413}     # paper optimal C
+    rbf:    {kind: rbf,    C: 2.057, gamma: 'scale'}    # paper optimal C; gamma='scale' = 1/(13*var)
+  random_state: 0

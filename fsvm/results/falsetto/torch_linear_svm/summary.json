@@ -1,0 +1,12 @@
+{
+  "script": "torch_linear_svm",
+  "C": 0.0413,
+  "lr": 0.001,
+  "epochs": 5000,
+  "wd_scale": 1.0,
+  "device": "cuda",
+  "mean_7fold_accuracy": 0.8389085173909084,
+  "mean_7fold_error": 0.16109148260909156,
+  "per_singer_samples": 12,
+  "elapsed_sec": 1083.1
+}

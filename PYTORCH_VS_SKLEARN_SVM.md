@@ -1,12 +1,12 @@
 # PyTorch vs. scikit-learn SVM — differences & gotchas
 
 This is a practitioner-oriented write-up that explains why the original
-`H:/GitHub/Falsetto-SVM/SVM.py` — a faithful snippet of
+`SVM.py` — a faithful snippet of
 `nn.Linear(13, 1) + HingeLoss` — does *not* match paper Eq.(7) even
 though both sketches "look the same", and what you'd need to do to
 make them match.
 
-The companion reproduction that lives at `J:/FSVM/fsvm/` exercises
+The companion reproduction that lives at `fsvm/` exercises
 both paths in identical 7-fold cross-validation loops on the same
 singer-frames. The numbers there are the empirical evidence behind
 everything written below.
@@ -90,7 +90,7 @@ Pick from this menu — don't trust intuition:
 
 Empirically on our 825..4675-frame singers, **`wd = C`** tracks
 `LinearSVC(C=0.0413)` within ~3 absolute CF points with zero per-N
-tuning. This is what `J:/FSVM/fsvm/torch_linear_svm.py` defaults to.
+tuning. This is what `fsvm/torch_linear_svm.py` defaults to.
 If you want a tighter fit, use a held-out validation grid — but then
 the simplicity is gone.
 
@@ -104,7 +104,7 @@ the simplicity is gone.
 ## 3. Why the upstream `SVM.py` collapses (and the fix)
 
 ```python
-# H:/GitHub/Falsetto-SVM/SVM.py
+# SVM.py
 class SVM(nn.Module):
     def __init__(self, input_dim, output_dim):
         super().__init__()
@@ -182,7 +182,7 @@ space. Implementing RBF via PyTorch requires either of:
 3. **Use sklearn under the hood.** Lift `joblib` outputs into
    PyTorch by `state_dict`-ing the support vectors and
    coefficients. Cleanest answer if precision matters; see
-   `J:/FSVM/fsvm/main.py` for how we did this on the linear path.
+   `fsvm/main.py` for how we did this on the linear path.
 
 For the paper's RBF claim of 1.5% error, we used option (3) — keep
 `SVC(kernel='rbf', C=2.057, gamma='scale')` as the trainer and
@@ -254,10 +254,10 @@ result to 1 CF point, run through this checklist:
 
 | Stage | File |
 |---|---|
-| Upstream clone (the code under audit)               | `H:/GitHub/Falsetto-SVM/SVM.py` |
-| Reproduction suite (PyTorch *and* sklearn paths)   | `J:/FSVM/fsvm/torch_linear_svm.py`, `J:/FSVM/fsvm/train.py` |
-| Inference main pairing both back-ends              | `J:/FSVM/fsvm/main.py` |
-| Full triangulation: paper ↔ upstream ↔ repro     | `H:/GitHub/Falsetto-SVM/REVIEW.md` |
+| Upstream clone (the code under audit)               | `SVM.py` |
+| Reproduction suite (PyTorch *and* sklearn paths)   | `fsvm/torch_linear_svm.py`, `fsvm/train.py` |
+| Inference main pairing both back-ends              | `fsvm/main.py` |
+| Full triangulation: paper ↔ upstream ↔ repro     | `REVIEW.md` |
 
 A clean ablation table (what we measured vs. what we expected) is in
 `REVIEW.md` § 5.
